@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficos de Tempo de Defeito</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            padding: 20px;
+            max-width: 100%;
+        }
+        h3 {
+            text-align: center;
+            margin: 20px 0; /* Adiciona margem para espaçamento vertical */
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            width: 800px; /* Define a largura do gráfico */
+            height: 400px; /* Define a altura do gráfico */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed; /* Força a tabela a ajustar à largura da página */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            word-wrap: break-word; /* Permite quebra de linha nas células */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        @media print {
+            body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+            }
+            .container {
+                padding: 10mm;
+            }
+            table, th, td {
+                font-size: 10pt; /* Ajuste o tamanho da fonte para caber melhor no PDF */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3 id="titulo">Análise de falhas dos servidores</h3>
+        <canvas id="graficoDefeito"></canvas>
+        <table id="tabelaDefeito">
+            <thead>
+                <tr>
+                    <th>Semana</th>
+                    <th>Tempo CFE 1 (minutos)</th>
+                    <th>Tempo CFE 2 (minutos)</th>
+                    <th>Falha Total (minutos)</th>
+                    <th>% do Total</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Totais</th>
+                    <th id="totalDefeitoCFE1"></th>
+                    <th id="totalDefeitoCFE2"></th>
+                    <th id="totalSobreposicao"></th>
+                    <th id="totalPercentualSobreposicao"></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <script>
+        fetch('dados_grafico.json')
+            .then(response => response.json())
+            .then(dados => {
+                const labels = dados.labels.map(label => {
+                    const data = new Date(label);
+                    const dia = String(data.getDate()).padStart(2, '0');
+                    const mes = String(data.getMonth() + 1).padStart(2, '0');
+                    const ano = String(data.getFullYear()).slice(-2);
+                    return `${dia}/${mes}/${ano}`;
+                });
+
+                const tabela = dados.tabela;
+                const totais = dados.totais;
+
+                // Atualizar o título com as datas de início e fim
+                const formatarData = (data) => {
+                    const dia = String(data.getDate()).padStart(2, '0');
+                    const mes = String(data.getMonth() + 1).padStart(2, '0');
+                    const ano = String(data.getFullYear()).slice(-2);
+                    return `${dia}/${mes}/${ano}`;
+                };
+
+                const dataInicio = new Date(dados.labels[0]);
+                const dataFim = new Date(dados.labels[dados.labels.length - 1]);
+                const titulo = `Análise de falhas dos servidores - ${formatarData(dataInicio)} à ${formatarData(dataFim)}`;
+                document.getElementById('titulo').textContent = titulo;
+
+                // Configurar os tipos de gráfico, tensão, cor e transparência para cada conjunto de dados
+                const datasets = [
+                    {
+                        label: 'CFE1',
+                        data: dados.datasets[0].data,
+                        type: 'bar',
+                        backgroundColor: 'rgba(0, 123, 255, 0.4)',  // Azul-escuro transparente
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'CFE2',
+                        data: dados.datasets[1].data,
+                        type: 'bar',
+                        backgroundColor: 'rgba(2, 202, 247, 0.4)',  // Rosa claro transparente
+                        borderColor: 'rgba(2, 202, 247, 1)',  // Rosa claro
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'AMBOS',
+                        data: dados.datasets[2].data,
+                        type: 'line', // Mantém como linha para sobreposição
+                        tension: 0.4,
+                        borderColor: 'rgba(255, 0, 0, 1)',  // Vermelho
+                        backgroundColor: 'rgba(255, 0, 0, 0.7)',  // Vermelho transparente com menos transparência
+                        fill: true,
+                        pointRadius: 0  // Remove os pontos
+                    }
+                ];
+
+                const config = {
+                    type: 'bar', // Tipo do gráfico principal
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Tempo de Defeito Semanal para CFE 1, CFE 2 e Sobreposição'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false // Remove o grid do eixo X
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false // Remove o grid do eixo Y
+                                }
+                            }
+                        }
+                    }
+                };
+
+                new Chart(document.getElementById('graficoDefeito'), config);
+
+                // Função para tratar valores NaN e arredondar para duas casas decimais
+                const tratarValor = (valor) => {
+                    return isNaN(parseFloat(valor)) ? '0.00' : parseFloat(valor).toFixed(2);
+                };
+
+                let somaPercentualSobreposicao = 0;
+                let semanasComDados = 0;
+
+                // Preencher a tabela
+                const tabelaBody = document.getElementById('tabelaDefeito').getElementsByTagName('tbody')[0];
+                tabela.forEach(item => {
+                    const row = tabelaBody.insertRow();
+                    const cellData = row.insertCell(0);
+                    const cellDefeitoCfe1 = row.insertCell(1);
+                    const cellDefeitoCfe2 = row.insertCell(2);
+                    const cellSobreposicao = row.insertCell(3);
+                    const cellPercentualSobreposicao = row.insertCell(4);
+
+                    const cfe1 = tratarValor(item.CFE1);
+                    const cfe2 = tratarValor(item.CFE2);
+                    const ambos = tratarValor(item.AMBOS);
+                    const percentualSobreposicao = ((parseFloat(ambos) / (1440*7)) * 100).toFixed(2) + '%';
+
+                    const semanaInicio = new Date(item.Week);
+                    const semanaFim = new Date(semanaInicio);
+                    semanaFim.setDate(semanaFim.getDate() + 6);
+
+                    const semanaFormatada = `${formatarData(semanaInicio)} - ${formatarData(semanaFim)}`;
+
+                    cellData.textContent = semanaFormatada;
+                    cellDefeitoCfe1.textContent = cfe1;
+                    cellDefeitoCfe2.textContent = cfe2;
+                    cellSobreposicao.textContent = ambos;
+                    cellPercentualSobreposicao.textContent = percentualSobreposicao;
+
+                    if (!isNaN(parseFloat(percentualSobreposicao))) {
+                        somaPercentualSobreposicao += parseFloat(percentualSobreposicao);
+                        semanasComDados += 1;
+                    }
+                });
+
+                // Calcular a média da % de sobreposição
+                const mediaPercentualSobreposicao = (somaPercentualSobreposicao / semanasComDados).toFixed(2) + '%';
+
+                // Preencher os totais
+                document.getElementById('totalDefeitoCFE1').textContent = tratarValor(totais.defeito_cfe1);
+                document.getElementById('totalDefeitoCFE2').textContent = tratarValor(totais.defeito_cfe2);
+                document.getElementById('totalSobreposicao').textContent = tratarValor(totais.sobreposicao);
+                document.getElementById('totalPercentualSobreposicao').textContent = mediaPercentualSobreposicao;
+            });
+    </script>
+</body>
+</html>
