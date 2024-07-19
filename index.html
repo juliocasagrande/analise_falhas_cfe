@@ -15,6 +15,15 @@
             padding: 20px;
             max-width: 100%;
         }
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .row img {
+            margin-right: 10px;
+        }
         h3 {
             text-align: center;
             margin: 20px 0; /* Adiciona margem para espaçamento vertical */
@@ -58,11 +67,20 @@
 </head>
 <body>
     <div class="container">
-        <h3 id="titulo">Análise de falhas dos servidores</h3>
+        <div class="row">
+            <img src="logo.png" width="150"><h3 id="titulo">Análise de falhas dos servidores</h3>
+            <h6 style="text-align: center;">Elaborado por Júlio Casagrande em 19/07/24</h6>
+        </div>
+        <h5><i>Para exibir o relatório online <a href="https://juliocasagrande.github.io/analise_falhas_cfe/">clique aqui!</a> (Gráficos responsivos disponíveis online)</i></h5>
+        <hr>
+        <h4>Gráfico de Falhas por CFE e período</h4>
         <canvas id="graficoDefeito"></canvas>
-        <h4>Análise do Gráfico</h4>
+        <hr>
+        <h4>Análise dos Resultados</h4>
         <p>Dos dados apresentados, nota-se que após a data de 14/05/23, ambos os servidores começaram a apresentar um desempenho muito bom, com uma disponibilidade bem elevada. <span style="color:rgb(23, 134, 1)"><strong><i>(99,41%)</i></strong></span></p>
         <p>Essa alta disponibilidade sugere que tenhamos uma alta confiabilidade no sistema, sendo esse um dos principais parâmetros a serem observados quando pensamos em implementar o teleassistimento das usinas da CTG Br.</p>
+        <hr>
+        <h4>Dados utilizados</h4>
         <p>A tabela abaixo dispõe os dados, retirados do PowerCC, que foram utilizados para realizar a construção do gráfico acima. </p>
 
         <table id="tabelaDefeito">
