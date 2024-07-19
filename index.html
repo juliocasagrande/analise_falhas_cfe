@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gráficos de Tempo de Defeito</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -158,6 +159,20 @@
                             title: {
                                 display: true,
                                 text: 'Tempo de Defeito Semanal para CFE 1, CFE 2 e Sobreposição'
+                            },
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'xy',
+                                    speed: 10,
+                                },
+                                zoom: {
+                                    enabled: true,
+                                    mode: 'xy',
+                                    speed: 0.1,
+                                    threshold: 2,
+                                    sensitivity: 3,
+                                }
                             }
                         },
                         scales: {
