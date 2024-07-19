@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gráficos de Tempo de Defeito</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0/dist/chartjs-plugin-zoom.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,8 +23,8 @@
             display: block;
             margin: 0 auto;
             max-width: 100%;
-            width: 100%; /* Ajuste a largura do gráfico */
-            height: 250px; /* Define a altura do gráfico */
+            width: 100%; /* Define a largura do gráfico */
+            height: 600; /* Define a altura do gráfico */
         }
         table {
             width: 100%;
@@ -61,6 +60,11 @@
     <div class="container">
         <h3 id="titulo">Análise de falhas dos servidores</h3>
         <canvas id="graficoDefeito"></canvas>
+        <h4>Análise do Gráfico</h4>
+        <p>Dos dados apresentados, nota-se que após a data de 14/05/23, ambos os servidores começaram a apresentar um desempenho muito bom, com uma disponibilidade bem elevada. <span style="color:rgb(23, 134, 1)"><strong><i>(99,41%)</i></strong></span></p>
+        <p>Essa alta disponibilidade sugere que tenhamos uma alta confiabilidade no sistema, sendo esse um dos principais parâmetros a serem observados quando pensamos em implementar o teleassistimento das usinas da CTG Br.</p>
+        <p>A tabela abaixo dispõe os dados, retirados do PowerCC, que foram utilizados para realizar a construção do gráfico acima. </p>
+
         <table id="tabelaDefeito">
             <thead>
                 <tr>
@@ -159,20 +163,6 @@
                             title: {
                                 display: true,
                                 text: 'Tempo de Defeito Semanal para CFE 1, CFE 2 e Sobreposição'
-                            },
-                            zoom: {
-                                pan: {
-                                    enabled: true,
-                                    mode: 'xy',
-                                    speed: 10,
-                                },
-                                zoom: {
-                                    enabled: true,
-                                    mode: 'xy',
-                                    speed: 0.1,
-                                    threshold: 2,
-                                    sensitivity: 3,
-                                }
                             }
                         },
                         scales: {
